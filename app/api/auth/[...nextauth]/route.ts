@@ -14,9 +14,28 @@ export const authOptions = {
 		credentials:{
 			username: {label: "Username", type:"text",placeholder:"jsmith"},
 			password: {label: "Password", type:"password",placeholder:"********"},
-		}	
+		},	
 		async authroize(credentials){
-					
+			if(!credentials.username || !credentials.password){
+				return null;
+			}
+			const user = await prisma.user.findUnique({
+				where: {
+					username: credentials.username
+				}
+			});
+			
+			if(!user){
+				return null;
+			}
+			
+			const passwordsMatch = await bcrypt.compare(credentials.password,user.hashedPassword);
+			
+			if(!passwordsMatch){
+				return null;
+			}
+			
+			return user;	
 		}
 	   })	
 	],
